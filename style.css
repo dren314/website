@@ -2,13 +2,31 @@ body {
     background-color: #e8e2d1;
     text-align: center;
 }
-a {
-    color: black;
-
+.top-links{
+    display: flex;
 }
-a:hover {
+.links a {
+    color:black;
+    text-align: center;
+}
+.links a:hover {
     color: red;
 }
+
 .triple{
     font-size: 3rem;
+}
+#special-button {
+  display: inline-block;
+  padding: 15px 10px;
+  background-color: #f1d074;
+  color: #6b5a29;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+  border-radius: 5px;
+  font-size: 20px;
+  font-weight: bold;
+}
+.button:hover {
+  background-color: #0056b3;
 }
