@@ -1,1 +1,68 @@
+import yfinance as yf, numpy, pandas, matplotlib.pyplot as plt
+#interval is a factor of .history()
+#number = int(period.replace("d", ""))
+#actions if for stock splits and dividends
+#Factors that should go into the bot:
+"""
+Statistical factors:
+RSI
+stochastic oscilator
+Z-score
+linear regression
+Moving averages (200, 50, 20, 9, so on) Exponential moving average and simple
+bollingerbands
+standard deviation
+DCMA
+alpha
+beta
+CAPM
+sharpe ratio
+linear regression between 2 stocks
+R^2
+historical stadard deviation (or mean deviation over period of time as well)
 
+Basic Data:
+Volume: Avg volume
+volatility
+Marketcap
+price
+closing ad opening pricings data
+high and low
+eps
+when earnigns reports are
+acid-test ratio
+... and more
+
+Also:
+VaR <-- !important!
+altman z-score
+?Sec filings analysis?
+
+Pivot points (Fibbonacci retracement, supportbands)
+?Hurst exponent, ADF and KPSS test (tiem series analysis),
+"""
+spcx = yf.Ticker("SPCX")
+period = "6mo"
+maperiod = "8mo"
+spcx_history = spcx.history(period, actions= False)
+
+def history(ticker, period, _actions=False):
+    return yf.Ticker(ticker).history(period, actions=_actions)
+def sma(prices, time_period, column="Close"):
+    return prices[column].rolling(window=time_period).mean()
+def ema():
+    pass
+
+#15d moving avg ad 50d moving average
+spcx15sma= sma(history("SPCX", maperiod),15)
+spcx50sma= sma(history("SPCX", maperiod),50)
+
+#Plot
+plt.style.use("dark_background")
+plt.plot(history("SPCX", maperiod).index, spcx15sma)
+plt.plot(history("SPCX", maperiod).index, spcx50sma)
+plt.plot(spcx_history.index, spcx_history["Close"])
+plt.xlabel("Time")
+plt.ylabel("Closing price")
+plt.title("SPCX")
+plt.show()
