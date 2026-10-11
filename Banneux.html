@@ -1,9 +1,77 @@
-import yfinance as yf, numpy, pandas, matplotlib.pyplot as plt
+import yfinance as yf, numpy as np, pandas as pd, matplotlib.pyplot as plt, re
 #interval is a factor of .history()
 #number = int(period.replace("d", ""))
 #actions if for stock splits and dividends
+# Show all rows
+pd.set_option('display.max_rows', None)
+
+# Show all columns
+pd.set_option('display.max_columns', None)
+spcx = yf.Ticker("AAPL")
+period = "12mo"
+spcx_history = spcx.history(period, actions= False)
+
+def num(_string):
+    return int(_string.rstrip("abcdefghijklmnopqrstuvwxyz"))
+def history(ticker, period, _actions=False):
+    return yf.Ticker(ticker).history(period, actions=_actions)
+
+def sma(ticker, period, window, column="Close"):
+    half_prices = history(ticker, period)
+    prices = history(ticker, str(num(period) * 2) + "mo")
+    sma = prices[column].rolling(window=window).mean()
+    return sma.tail(len(half_prices.index))
+def ema(ticker, period, window):
+    df = history(ticker, period)
+    return df["Close"].ewm(alpha=2/(window+1),adjust=False).mean()
+def z_score(ticker, period, window):
+    df2 = history(ticker, str(num(period) * 2) + "mo")["Close"]
+    df = history(ticker, period)["Close"]
+    score = (df2 - sma(ticker, period , window)) / df2.rolling(window=window).std()
+    return score.tail(len(df.index))
+def bollinger_bands(ticker, period, window):
+    std = history(ticker, period).rolling(window=window).std()
+    _sma = sma(ticker, period, window)
+    upper_band = _sma + 2 * std
+    lower_band = _sma - 2 * std
+    middle_band = _sma
+    return
+def rsi(ticker, period, window=14):
+    pass
+#15d moving avg and 50d moving average
+spcx15sma= sma("AAPL", period, 15)
+spcx50sma= sma("AAPL", period, 50)
+#15d exponential moving avg and 50d average
+spcx15ema = ema("AAPL", period, 15)
+spcx50ema = ema("AAPL", period, 50)
+
+#Plot
+figure, axes = plt.subplots(2,1)
+x_axis = spcx_history.index
+plt.style.use("dark_background")
+axes[0].grid(True)
+axes[0].set_title("AAPL")
+axes[1].set_title("Z-score")
+axes[1].grid(True)
+axes[1].axhline(y=2, color="yellow", lw=2)
+axes[1].axhline(y=-2, color="yellow", lw=2)
+#plt.plot(x_axis, spcx15sma, color="red")
+#plt.plot(x_axis, spcx50sma, color="orange")
+axes[0].plot(x_axis, spcx_history["Close"],color="green")
+score = z_score("AAPL", period, 20)
+axes[1].plot(x_axis, score)
+#plt.plot(x_axis, spcx15ema, color="green")
+#plt.plot(x_axis, spcx50ema, color="blue")
+plt.xlabel("Time")
+plt.ylabel("Closing price")
+plt.show()
+
+
+
+
 #Factors that should go into the bot:
 """
+todo:
 Statistical factors:
 RSI
 stochastic oscilator
@@ -41,28 +109,12 @@ altman z-score
 Pivot points (Fibbonacci retracement, supportbands)
 ?Hurst exponent, ADF and KPSS test (tiem series analysis),
 """
-spcx = yf.Ticker("SPCX")
-period = "6mo"
-maperiod = "8mo"
-spcx_history = spcx.history(period, actions= False)
 
-def history(ticker, period, _actions=False):
-    return yf.Ticker(ticker).history(period, actions=_actions)
-def sma(prices, time_period, column="Close"):
-    return prices[column].rolling(window=time_period).mean()
-def ema():
-    pass
+The 50-day and 200-day moving averages are commonly used to identify golden crosses
+For example, the 50-day moving average crossover up through
+the 200-day moving average on an index like the S&P 500 is one of the most popular bullish market signals.
+50 and 200 are also used for death cross as well when the shrot term indicator crosses below the long term one
+used on index like voo and s&p 500 alot to get view of whole market, but it's good for singular stocks as well
 
-#15d moving avg ad 50d moving average
-spcx15sma= sma(history("SPCX", maperiod),15)
-spcx50sma= sma(history("SPCX", maperiod),50)
+12 and 26 periods used for ema and 50 and 200 for long term ema patterns
 
-#Plot
-plt.style.use("dark_background")
-plt.plot(history("SPCX", maperiod).index, spcx15sma)
-plt.plot(history("SPCX", maperiod).index, spcx50sma)
-plt.plot(spcx_history.index, spcx_history["Close"])
-plt.xlabel("Time")
-plt.ylabel("Closing price")
-plt.title("SPCX")
-plt.show()
